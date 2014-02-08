@@ -1,0 +1,26 @@
+#!/bin/bash
+
+
+set -e
+
+
+if [ $# -ne 1 ]
+then
+	echo "Usage: $0 <partition-device>" 2>&1
+	exit 1
+fi
+
+
+ROOT_PARTITION_DEVICE=`readlink -f $1`
+
+if mount | grep "$ROOT_PARTITION_DEVICE on" > /dev/null
+then
+	:
+else
+	#find the hub-port on which the device sits. if the device does not exist, find_hub_port_of_partition throws an error
+	HUB_PORT=`find_hub_port_of_partition $ROOT_PARTITION_DEVICE`
+
+	#turn the power of that port off
+	hub_power_control $HUB_PORT 0
+	
+fi

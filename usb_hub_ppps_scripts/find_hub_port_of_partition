@@ -1,0 +1,45 @@
+#!/bin/bash
+
+
+set -e
+
+
+if [ $# -ne 1 ]
+then
+	echo "Usage: $0 <disk device> (/dev/sda1 or /dev/disk/by-uuid/b6754e32-8578-4ee7-a5e2-8323528ce495 alike)" 1>&2
+	exit 1
+fi
+
+
+
+#follow symlinks right to the end
+PART_DEVICE=`readlink -f $1`
+
+#iterate over all disks
+for i in $(find /dev/disk/by-path )
+do
+	DEV_PATH=$i
+	#follow that symlink to the end
+	DEVICE=`readlink -f $DEV_PATH`
+	
+	#compare if we have found the right device
+	if [ "$DEVICE" = "$PART_DEVICE" ]
+	then
+		#in this case we have found the right device path in the form like this: /dev/disk/by-path/platform-s5p-ehci-usb-0:2.1.3.1:1.0-scsi-0:0:0:0-part3
+		DEV_PATH_FOUND="$DEV_PATH"
+		break
+  fi
+done
+
+
+if [ "$DEV_PATH_FOUND" = "" ]
+then
+	echo "Device $1 not found" 1>&2
+	exit 1
+fi
+
+
+#the first sed removes everything (including) after :1.0, the second sed returns the last character (that is the port number). ouf!
+echo $DEV_PATH | sed 's/:1\.0.*//' | sed -e 's/\(^.*\)\(.$\)/\2/'
+
+

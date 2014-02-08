@@ -1,0 +1,36 @@
+#!/bin/bash
+
+
+HUB_VID="0409"
+HUB_PID="0059"
+
+
+function get_usb_device_path {
+	echo `grep -rl $HUB_PID /sys/bus/usb/devices/*/idProduct` | sed -r 's/\/idProduct//'
+}
+
+function get_hub_bus {
+	cat $1/busnum
+}
+
+function get_hub_device {
+	cat $1/devnum
+}
+
+
+
+
+if [ $# -ne 2 ]
+then
+	echo "Usage: $0 <hub-port> <1|0>"
+	exit 1
+fi
+
+HUB_DEV_PATH=`get_usb_device_path`
+HUB_BUS=`get_hub_bus $HUB_DEV_PATH`
+HUB_DEVICE=`get_hub_device $HUB_DEV_PATH`
+
+
+
+/home/befi/src/hub-control/hub-control -b $HUB_BUS -d $HUB_DEVICE -P $1 -p $2
+

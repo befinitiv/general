@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+
+
+#construct the device file name out of the mount point
+DEVICE="/opt/$1_partition"
+
+#find the hub-port on which the device sits. if the device does not exist, find_hub_port_of_partition throws an error
+HUB_PORT=`find_hub_port_of_partition $DEVICE`
+
+
+#turn the power of that port on
+hub_power_control $HUB_PORT 1
+
+sleep 10
+
+echo "-fstype=auto :$DEVICE"
