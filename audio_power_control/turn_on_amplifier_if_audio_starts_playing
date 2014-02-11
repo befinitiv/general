@@ -26,7 +26,7 @@ do
 	then
 		off_timer=0
 		echo "Turning amplifier on"
-		/home/befi/scripts/2on
+		2on
 	fi
 
 	#1->0
@@ -41,7 +41,7 @@ do
 		then
 			off_timer=0
 			echo "Turning amplifier off"
-			/home/befi/scripts/2off
+			2off
 		else
 			((off_timer++))
 		fi
