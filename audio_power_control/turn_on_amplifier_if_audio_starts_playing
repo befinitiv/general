@@ -1,0 +1,52 @@
+#!/bin/bash
+
+
+set -e
+
+
+#time to wait until the amplifier is turned off in seconds
+off_timer_time=60
+
+last_is_playing=0
+off_timer=0
+
+
+while true
+do
+	if cat /proc/asound/card0/pcm0p/sub0/status | grep -i RUNNING > /dev/null
+	then
+		is_playing=1
+	else
+		is_playing=0
+	fi
+
+
+	#0->1
+	if [[ "$last_is_playing" -eq "0" && "$is_playing" -eq "1" ]]
+	then
+		off_timer=0
+		echo "Turning amplifier on"
+		/home/befi/scripts/2on
+	fi
+
+	#1->0
+	if [[ "$last_is_playing" -eq "1" && "$is_playing" -eq "0" ]]
+	then
+		off_timer=1
+	fi
+
+	if [ "$off_timer" -ne "0" ]
+	then
+		if [ "$off_timer" -eq "$off_timer_time" ]
+		then
+			off_timer=0
+			echo "Turning amplifier off"
+			/home/befi/scripts/2off
+		else
+			((off_timer++))
+		fi
+	fi
+
+	last_is_playing=$is_playing
+	sleep 1
+done
